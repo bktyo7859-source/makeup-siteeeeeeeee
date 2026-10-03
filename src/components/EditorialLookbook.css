@@ -1,0 +1,195 @@
+/* ==========================================================================
+   Editorial Lookbook Styles (Black + Red Aesthetic)
+   ========================================================================== */
+
+.lookbook-section {
+  padding: 6.5rem 2rem;
+  background: #050505;
+  border-top: 1px solid rgba(193, 18, 31, 0.2);
+}
+
+.lookbook-container {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.lookbook-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 3.5rem auto;
+}
+
+.lookbook-title {
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 300;
+  color: #ffffff;
+  margin: 0.75rem 0 0.75rem 0;
+}
+
+.lookbook-sub {
+  font-size: 0.95rem;
+  color: #a6a6a6;
+}
+
+.lookbook-matrix {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.look-tabs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.look-tab-card {
+  padding: 1.75rem;
+  background: rgba(16, 16, 16, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.look-tab-card:hover {
+  border-color: rgba(193, 18, 31, 0.4);
+  background: rgba(193, 18, 31, 0.06);
+}
+
+.look-tab-card.is-selected {
+  border-color: var(--accent-red);
+  background: rgba(193, 18, 31, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.look-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.look-season {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  font-weight: 600;
+}
+
+.look-arrow {
+  color: #a6a6a6;
+}
+
+.look-title {
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.look-desc {
+  font-size: 0.85rem;
+  color: #a6a6a6;
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+}
+
+.look-shade-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: #d1d1d1;
+  font-style: italic;
+}
+
+/* Preview Col */
+.look-preview-col {
+  display: flex;
+}
+
+.look-active-card {
+  background: linear-gradient(135deg, #121212 0%, #0a0a0a 100%);
+  border: 1px solid rgba(193, 18, 31, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 3rem 2.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(193, 18, 31, 0.15);
+}
+
+.look-badge-top {
+  font-size: 0.68rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  font-weight: 600;
+}
+
+.look-hero-name {
+  font-size: 2.2rem;
+  color: #ffffff;
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 300;
+}
+
+.look-hero-desc {
+  font-size: 0.95rem;
+  color: #d1d1d1;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.products-used-box {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 1.5rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2rem;
+}
+
+.products-used-title {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-red);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.products-used-box ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.products-used-box li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.bullet-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--accent-red);
+}
+
+.look-cta {
+  align-self: flex-start;
+}
+
+@media (max-width: 900px) {
+  .lookbook-matrix {
+    grid-template-columns: 1fr;
+  }
+}

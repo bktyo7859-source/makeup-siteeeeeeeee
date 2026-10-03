@@ -1,0 +1,84 @@
+/* ==========================================================================
+   Press Accolades Styles (Black + Red Aesthetic)
+   ========================================================================== */
+
+.press-section {
+  padding: 5rem 2rem;
+  background: #080808;
+  border-top: 1px solid rgba(193, 18, 31, 0.2);
+  border-bottom: 1px solid rgba(193, 18, 31, 0.2);
+}
+
+.press-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.press-crest-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  font-weight: 600;
+  margin-bottom: 3.5rem;
+}
+
+.crest-icon {
+  color: var(--accent-red);
+}
+
+.press-quotes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+}
+
+.press-quote-card {
+  padding: 2.5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.press-quote-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(193, 18, 31, 0.4);
+}
+
+.press-logo {
+  font-size: 1.8rem;
+  letter-spacing: 0.15em;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+}
+
+.press-quote {
+  font-size: 1.25rem;
+  font-style: italic;
+  font-weight: 300;
+  color: #d1d1d1;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.press-author-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #a6a6a6;
+}

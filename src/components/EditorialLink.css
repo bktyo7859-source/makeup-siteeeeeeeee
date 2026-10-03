@@ -1,0 +1,137 @@
+/* ==========================================================================
+   Editorial Link / Text-Only CTA System (High-Fashion Luxury Aesthetic)
+   ========================================================================== */
+
+.editorial-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0.45rem 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #ffffff;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+/* Text child wrapper */
+.editorial-link-text {
+  position: relative;
+  display: inline-block;
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Arrow element */
+.editorial-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1;
+}
+
+.editorial-arrow svg {
+  display: block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Hover Interaction: Text & Arrow turn Luxury Red (#C1121F), Arrow slides right */
+.editorial-link:hover {
+  color: var(--accent-red);
+}
+
+.editorial-link:hover .editorial-link-text {
+  color: var(--accent-red);
+}
+
+.editorial-link:hover .editorial-arrow {
+  color: var(--accent-red);
+  transform: translateX(6px);
+}
+
+/* Active State */
+.editorial-link:active {
+  color: var(--accent-red-hover);
+}
+
+.editorial-link:active .editorial-arrow {
+  transform: translateX(8px);
+}
+
+/* Focus Visible */
+.editorial-link:focus-visible {
+  outline: 1px dashed var(--accent-red);
+  outline-offset: 4px;
+}
+
+/* Sizes */
+.editorial-link.size-sm {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  gap: 0.5rem;
+}
+.editorial-link.size-sm .editorial-arrow svg {
+  width: 13px;
+  height: 13px;
+}
+
+.editorial-link.size-md {
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  gap: 0.65rem;
+}
+.editorial-link.size-md .editorial-arrow svg {
+  width: 15px;
+  height: 15px;
+}
+
+.editorial-link.size-lg {
+  font-size: 0.92rem;
+  letter-spacing: 0.16em;
+  gap: 0.85rem;
+}
+.editorial-link.size-lg .editorial-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Variants */
+.editorial-link.variant-muted {
+  color: #a6a6a6;
+}
+.editorial-link.variant-muted .editorial-arrow {
+  color: #a6a6a6;
+}
+.editorial-link.variant-muted:hover {
+  color: var(--accent-red);
+}
+.editorial-link.variant-muted:hover .editorial-arrow {
+  color: var(--accent-red);
+}
+
+.editorial-link.variant-subtle {
+  font-weight: 500;
+  font-size: 0.76rem;
+  color: #d1d1d1;
+}
+
+/* Disabled state */
+.editorial-link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -1,0 +1,161 @@
+/* ==========================================================================
+   Interactive Video Hero Styles (MP4 Intro + Canvas Frame Sequence)
+   Black + Red Luxury Beauty Aesthetic
+   ========================================================================== */
+
+.interactive-hero-viewport {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #050505;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: ew-resize;
+}
+
+.interactive-hero-viewport.is-intro {
+  cursor: default;
+}
+
+/* Original Pristine Video — No filters, No artificial recoloring, No dimming */
+.hero-pristine-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  display: block;
+  pointer-events: none;
+  z-index: 2;
+  will-change: opacity;
+  transition: opacity 0.1s ease;
+}
+
+.hero-pristine-video.video-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-pristine-video.video-visible {
+  opacity: 1;
+}
+
+/* Single High-Performance Interactive Canvas */
+.hero-interactive-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 1;
+  will-change: transform;
+}
+
+.hero-interactive-canvas.canvas-visible {
+  opacity: 1;
+}
+
+.hero-interactive-canvas.canvas-hidden {
+  opacity: 0;
+}
+
+/* Luxury Interactive Status Indicator Badge - Black & Red */
+.interactive-mode-badge {
+  position: absolute;
+  top: 100px;
+  right: 2.5rem;
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1.15rem;
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(193, 18, 31, 0.45);
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(193, 18, 31, 0.15);
+  animation: badgeFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.interactive-mode-badge.interacted {
+  opacity: 0.7;
+}
+
+.badge-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--accent-red);
+  box-shadow: 0 0 10px var(--accent-red);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+.badge-arrows {
+  display: flex;
+  gap: 0.3rem;
+  color: var(--accent-red-hover);
+  font-size: 0.85rem;
+  animation: arrowsGlow 1.8s infinite alternate ease-in-out;
+}
+
+@keyframes badgeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+}
+
+@keyframes arrowsGlow {
+  0% {
+    transform: translateX(-2px);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateX(2px);
+    opacity: 1;
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .hero-pristine-video {
+    object-position: center center;
+  }
+  .interactive-mode-badge {
+    top: 85px;
+    right: 1rem;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+  }
+}

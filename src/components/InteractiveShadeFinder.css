@@ -1,0 +1,292 @@
+/* ==========================================================================
+   Interactive Shade Finder Modal Styles (Black + Red Aesthetic)
+   ========================================================================== */
+
+.shade-finder-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shade-finder-modal {
+  background: #0d0d0d;
+  border: 1px solid rgba(193, 18, 31, 0.4);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(193, 18, 31, 0.2);
+}
+
+.finder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.finder-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  font-weight: 600;
+}
+
+.finder-close-btn {
+  background: none;
+  border: none;
+  color: #a6a6a6;
+  cursor: pointer;
+  padding: 0.4rem;
+  transition: color var(--transition-fast);
+}
+
+.finder-close-btn:hover {
+  color: #ffffff;
+}
+
+/* Progress Track */
+.finder-progress-track {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.progress-segment {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+.progress-segment.is-active {
+  background: var(--accent-red);
+}
+
+/* Step Body */
+.step-num-tag {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  margin-bottom: 0.4rem;
+}
+
+.step-question {
+  font-size: 1.85rem;
+  font-weight: 300;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.step-hint {
+  font-size: 0.85rem;
+  color: #a6a6a6;
+  margin-bottom: 1.8rem;
+}
+
+/* Tone Options Grid */
+.tone-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 2.2rem;
+}
+
+.tone-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.1rem 1.4rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+  color: var(--text-primary);
+}
+
+.tone-card-btn:hover {
+  border-color: rgba(193, 18, 31, 0.5);
+  background: rgba(193, 18, 31, 0.06);
+  transform: translateX(4px);
+}
+
+.tone-card-btn.is-selected {
+  border-color: var(--accent-red);
+  background: rgba(193, 18, 31, 0.15);
+}
+
+.tone-swatch-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.tone-text-block {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.tone-name {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: #ffffff;
+}
+
+.tone-desc {
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  color: #a6a6a6;
+}
+
+.selected-check {
+  color: var(--accent-red);
+  flex-shrink: 0;
+}
+
+/* Action Row */
+.finder-action-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.finder-action-row.split {
+  justify-content: space-between;
+}
+
+/* Results View */
+.results-view {
+  text-align: center;
+}
+
+.results-header {
+  margin-bottom: 2rem;
+}
+
+.results-title {
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.results-sub {
+  font-size: 0.85rem;
+  color: #a6a6a6;
+}
+
+.matched-products-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.match-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(193, 18, 31, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.match-tag {
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-red);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.match-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1rem;
+}
+
+.match-name {
+  font-size: 1.2rem;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.match-shade-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--accent-red);
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+}
+
+.shade-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.match-desc {
+  font-size: 0.75rem;
+  color: #a6a6a6;
+  margin-bottom: 0.75rem;
+}
+
+.match-price {
+  font-size: 1.3rem;
+  color: #ffffff;
+}
+
+.finder-add-all-btn.added {
+  background: #7A0710;
+  border-color: var(--accent-red);
+  color: #ffffff;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 640px) {
+  .shade-finder-modal {
+    padding: 1.5rem;
+  }
+  .step-question {
+    font-size: 1.4rem;
+  }
+}

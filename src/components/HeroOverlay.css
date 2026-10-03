@@ -1,0 +1,171 @@
+/* ==========================================================================
+   Hero Overlay Styles (Black & Red Luxury Beauty Aesthetic)
+   ========================================================================== */
+
+.hero-editorial-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* Allows cursor tracking across entire hero screen */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6.5rem 3.5rem 2.5rem 3.5rem;
+}
+
+/* Allow interactive buttons & indicators to receive clicks */
+.hero-editorial-overlay button,
+.hero-editorial-overlay a,
+.hero-scroll-indicator {
+  pointer-events: auto;
+}
+
+/* Top Meta */
+.hero-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-brand-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #ffffff;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.brand-dot {
+  color: var(--accent-red);
+  opacity: 0.8;
+}
+
+/* Content Cluster (Bottom Left positioning so face remains center stage) */
+.hero-content-cluster {
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: auto;
+  margin-bottom: 2rem;
+}
+
+.hero-editorial-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.red-dash {
+  width: 20px;
+  height: 2px;
+  background-color: var(--accent-red);
+}
+
+.hero-main-title {
+  font-size: clamp(2.5rem, 4.5vw, 4.2rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85);
+}
+
+.title-italic-accent {
+  font-style: italic;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.hero-description {
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  font-weight: 400;
+  color: #a6a6a6;
+  max-width: 480px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
+}
+
+/* Bottom Bar */
+.hero-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  width: 100%;
+}
+
+.hero-meta-note {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: #a6a6a6;
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.hero-meta-note.right {
+  text-align: right;
+}
+
+.meta-number {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  color: var(--accent-red);
+  font-weight: 700;
+}
+
+.hero-scroll-wrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .hero-editorial-overlay {
+    padding: 5.5rem 2rem 2rem 2rem;
+  }
+  .hero-main-title {
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-editorial-overlay {
+    padding: 5rem 1.25rem 1.5rem 1.25rem;
+  }
+  .hero-meta-note {
+    display: none;
+  }
+  .hero-content-cluster {
+    max-width: 100%;
+    margin-bottom: 3.5rem;
+  }
+  .hero-main-title {
+    font-size: 2.2rem;
+  }
+  .hero-description {
+    font-size: 0.88rem;
+  }
+}
