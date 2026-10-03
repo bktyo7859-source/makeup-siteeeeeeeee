@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EditorialProductChapter } from '../types/editorial';
 import { Sparkles } from 'lucide-react';
 import { EditorialLink } from './EditorialLink';
@@ -17,27 +17,31 @@ export const EditorialChapter: React.FC<EditorialChapterProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState<boolean>(false);
 
-  // High-performance IntersectionObserver for cinematic video playback
+  // Lazy-load and intersection observation for mobile stability
   useEffect(() => {
-    const video = videoRef.current;
     const section = sectionRef.current;
-    if (!video || !section) return;
-
-    video.muted = true;
-    video.playsInline = true;
+    if (!section) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            video.play().catch(() => {});
+            setShouldLoadVideo(true);
+            const video = videoRef.current;
+            if (video) {
+              video.play().catch(() => {});
+            }
           } else {
-            video.pause();
+            const video = videoRef.current;
+            if (video) {
+              video.pause();
+            }
           }
         });
       },
-      { threshold: 0.15 }
+      { rootMargin: '250px', threshold: 0.1 }
     );
 
     observer.observe(section);
@@ -70,17 +74,18 @@ export const EditorialChapter: React.FC<EditorialChapterProps> = ({
 
         {/* Main Content Layout Grid */}
         <div className="chapter-main-grid">
-          {/* 1. Cinematic Video Frame (Dominant Media) */}
+          {/* 1. Cinematic Video Frame */}
           <div className="chapter-video-column">
             <div className="video-cinematic-container">
               <video
                 ref={videoRef}
-                src={chapter.videoSrc}
+                src={shouldLoadVideo ? chapter.videoSrc : undefined}
                 className="chapter-cinematic-video"
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                webkit-playsinline="true"
+                preload="none"
               />
               <div className="video-corner-label">
                 <span className="red-square" aria-hidden="true" />

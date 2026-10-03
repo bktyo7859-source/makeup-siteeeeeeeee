@@ -29,18 +29,24 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
   const [hasInteracted, setHasInteracted] = useState<boolean>(false);
   const [reducedMotion, setReducedMotion] = useState<boolean>(false);
 
-  // In-memory cache of decoded frames (ImageBitmap or HTMLImageElement)
-  const frameCacheRef = useRef<(ImageBitmap | HTMLImageElement | null)[]>(
-    new Array(TOTAL_FRAMES + 1).fill(null)
+  // Detect mobile / touch device for memory conservation
+  const isMobileRef = useRef<boolean>(
+    typeof window !== 'undefined' && (window.innerWidth <= 768 || 'ontouchstart' in window)
   );
 
-  // Mutable animation and tracking state in ref for 60FPS loop with NO React re-renders
+  // Bounded memory cache: Map of frameIndex -> HTMLImageElement | ImageBitmap
+  // Strict size limit to prevent Mobile WebKit memory limit crashes
+  const MAX_CACHE_SIZE = isMobileRef.current ? 40 : 80;
+  const frameCacheMapRef = useRef<Map<number, ImageBitmap | HTMLImageElement>>(new Map());
+  const pendingLoadsRef = useRef<Set<number>>(new Set());
+
+  // Mutable animation state in ref for 60FPS loop with NO React re-renders
   const animStateRef = useRef({
     phase: 'intro' as 'intro' | 'interactive',
     startFrame: START_FRAME_INDEX,
     endFrame: END_FRAME_INDEX,
-    targetNormX: 0.5,      // 0 = left (frame 90), 0.5 = center (~frame 165), 1 = right (frame 240)
-    currentNormX: 0.5,     // interpolated via lerp
+    targetNormX: 0.5,
+    currentNormX: 0.5,
     isHovered: false,
     lastDrawnFrame: -1,
     canvasWidth: 0,
@@ -65,54 +71,128 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
+  // Safe frame evictor: releases GPU VRAM immediately
+  const storeFrameInCache = useCallback((frameNum: number, imgObj: ImageBitmap | HTMLImageElement) => {
+    const cache = frameCacheMapRef.current;
+    
+    // Evict oldest/furthest frame if cache exceeds safe threshold
+    if (cache.size >= MAX_CACHE_SIZE) {
+      const currentFrame = animStateRef.current.lastDrawnFrame > 0 
+        ? animStateRef.current.lastDrawnFrame 
+        : START_FRAME_INDEX;
+      
+      let furthestFrame = -1;
+      let maxDist = -1;
+
+      for (const [key] of cache) {
+        const dist = Math.abs(key - currentFrame);
+        if (dist > maxDist) {
+          maxDist = dist;
+          furthestFrame = key;
+        }
+      }
+
+      if (furthestFrame !== -1) {
+        const evicted = cache.get(furthestFrame);
+        if (evicted && 'close' in evicted && typeof evicted.close === 'function') {
+          try {
+            evicted.close(); // Instantly frees GPU texture memory in Safari/Chrome
+          } catch {
+            // ignore
+          }
+        }
+        cache.delete(furthestFrame);
+      }
+    }
+
+    cache.set(frameNum, imgObj);
+  }, [MAX_CACHE_SIZE]);
+
+  // Load a single frame safely with HTMLImageElement or ImageBitmap
+  const loadSingleFrame = useCallback(async (frameNum: number): Promise<void> => {
+    if (frameCacheMapRef.current.has(frameNum) || pendingLoadsRef.current.has(frameNum)) {
+      return;
+    }
+
+    pendingLoadsRef.current.add(frameNum);
+    const url = getFrameUrl(frameNum);
+
+    try {
+      if ('createImageBitmap' in window && !isMobileRef.current) {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const bitmap = await createImageBitmap(blob);
+        storeFrameInCache(frameNum, bitmap);
+      } else {
+        // HTMLImageElement uses native browser disk caching without bloating VRAM
+        await new Promise<void>((resolve) => {
+          const img = new Image();
+          img.decoding = 'async';
+          img.src = url;
+          img.onload = () => {
+            storeFrameInCache(frameNum, img);
+            resolve();
+          };
+          img.onerror = () => resolve();
+        });
+      }
+    } catch {
+      // Fallback handles closest available frame
+    } finally {
+      pendingLoadsRef.current.delete(frameNum);
+    }
+  }, [storeFrameInCache]);
+
   // Soft luxury curve with center deadzone
-  // Near center (0.44 to 0.56): subtle/damped motion to maintain facial stability
-  // Further out: luxurious smooth acceleration
   const calculateLuxuryNormX = useCallback((rawNormX: number): number => {
     const clamped = Math.max(0, Math.min(1, rawNormX));
-    const delta = clamped - 0.5; // -0.5 to +0.5
+    const delta = clamped - 0.5;
     const absDelta = Math.abs(delta);
     const sign = Math.sign(delta);
-
-    const deadzoneRadius = 0.06; // 6% center deadzone
+    const deadzoneRadius = 0.06;
 
     if (absDelta <= deadzoneRadius) {
-      // Inside deadzone: subtle cubic damping for stable facial contact
       const t = absDelta / deadzoneRadius;
       return 0.5 + sign * (t * t * 0.012);
     }
 
-    // Outside deadzone: continuous smooth power curve for silky head turning
     const span = 0.5 - deadzoneRadius;
-    const progress = (absDelta - deadzoneRadius) / span; // 0 to 1
+    const progress = (absDelta - deadzoneRadius) / span;
     const easedProgress = Math.pow(progress, 1.25);
     const mappedOffset = 0.012 + easedProgress * (0.5 - 0.012);
 
     return 0.5 + sign * mappedOffset;
   }, []);
 
-  // Helper: Draw frame on canvas with object-fit: cover
+  // Draw frame on canvas with object-fit: cover
   const drawFrameToCanvas = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
-    const cache = frameCacheRef.current;
-    let imgObj = cache[frameIndex];
+    const cache = frameCacheMapRef.current;
+    let imgObj = cache.get(frameIndex);
 
-    // If target frame not ready yet, search outward for closest loaded frame
+    // If target frame is not in cache yet, find closest loaded frame
     if (!imgObj) {
-      for (let offset = 1; offset < 30; offset++) {
-        if (frameIndex - offset >= 1 && cache[frameIndex - offset]) {
-          imgObj = cache[frameIndex - offset];
-          break;
-        }
-        if (frameIndex + offset <= TOTAL_FRAMES && cache[frameIndex + offset]) {
-          imgObj = cache[frameIndex + offset];
-          break;
+      let closestDist = 999;
+      let closestKey = -1;
+
+      for (const [key] of cache) {
+        const dist = Math.abs(key - frameIndex);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestKey = key;
         }
       }
+
+      if (closestKey !== -1) {
+        imgObj = cache.get(closestKey);
+      }
+
+      // Trigger lazy load for requested frame
+      loadSingleFrame(frameIndex);
     }
 
     if (!imgObj) return;
@@ -128,13 +208,11 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
     let offsetY: number;
 
     if (canvasAspect > imgAspect) {
-      // Screen is wider than 16:9
       renderW = canvasW;
       renderH = canvasW / imgAspect;
       offsetX = 0;
-      offsetY = (canvasH - renderH) * 0.3; // align with video center 30%
+      offsetY = (canvasH - renderH) * 0.3;
     } else {
-      // Screen is taller than 16:9
       renderH = canvasH;
       renderW = canvasH * imgAspect;
       offsetX = (canvasW - renderW) * 0.5;
@@ -143,16 +221,16 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
 
     ctx.drawImage(imgObj, offsetX, offsetY, renderW, renderH);
     animStateRef.current.lastDrawnFrame = frameIndex;
-  }, []);
+  }, [loadSingleFrame]);
 
-  // Resize canvas according to viewport dimensions & DPR
+  // Resize canvas according to viewport dimensions & DPR (capped at 2)
   const updateCanvasSize = useCallback(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
     const rect = container.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap DPR at 2 for performance
+    const dpr = Math.min(window.devicePixelRatio || 1, isMobileRef.current ? 1.5 : 2);
 
     const w = Math.round(rect.width * dpr);
     const h = Math.round(rect.height * dpr);
@@ -164,86 +242,69 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
       animStateRef.current.canvasHeight = h;
       animStateRef.current.dpr = dpr;
 
-      // Redraw current frame if in interactive phase
       if (animStateRef.current.phase === 'interactive' && animStateRef.current.lastDrawnFrame > 0) {
         drawFrameToCanvas(animStateRef.current.lastDrawnFrame);
       }
     }
   }, [drawFrameToCanvas]);
 
-  // Priority Frame Preloading Pipeline
+  // Gentle Preloading Pipeline: Prioritize transition frames (85-105) without memory spikes
   useEffect(() => {
     let isCancelled = false;
 
-    const loadSingleFrame = async (frameNum: number): Promise<void> => {
-      if (frameCacheRef.current[frameNum] || isCancelled) return;
-
-      const url = getFrameUrl(frameNum);
-      try {
-        if ('createImageBitmap' in window) {
-          const res = await fetch(url);
-          const blob = await res.blob();
-          if (isCancelled) return;
-          const bitmap = await createImageBitmap(blob);
-          if (!isCancelled) {
-            frameCacheRef.current[frameNum] = bitmap;
-          }
-        } else {
-          await new Promise<void>((resolve) => {
-            const img = new Image();
-            img.src = url;
-            img.onload = () => {
-              if (!isCancelled) {
-                frameCacheRef.current[frameNum] = img;
-              }
-              resolve();
-            };
-            img.onerror = () => resolve();
-          });
-        }
-      } catch {
-        // Ignore single frame load error (fallback logic handles nearest frame)
-      }
-    };
-
-    // 1. Critical Phase: Load initial transition frames (frames 85 to 105) immediately
-    const preloadCriticalFrames = async () => {
-      const criticalPromises: Promise<void>[] = [];
+    const runPreload = async () => {
+      // 1. Initial critical transition frames for 3.0s handoff
+      const criticalFrames: number[] = [];
       for (let i = START_FRAME_INDEX - 5; i <= START_FRAME_INDEX + 15; i++) {
         if (i >= 1 && i <= TOTAL_FRAMES) {
-          criticalPromises.push(loadSingleFrame(i));
+          criticalFrames.push(i);
         }
       }
-      await Promise.all(criticalPromises);
 
-      // 2. Secondary Phase: Progressively load remaining frames across interactive range
+      for (const num of criticalFrames) {
+        if (isCancelled) return;
+        await loadSingleFrame(num);
+      }
+
+      // 2. Sampled interactive frames on idle
       if (isCancelled) return;
 
-      // Preload frames in chunks to keep network/GPU smooth
-      const remainingFrames: number[] = [];
-      for (let i = START_FRAME_INDEX + 16; i <= END_FRAME_INDEX; i++) {
-        remainingFrames.push(i);
+      const step = isMobileRef.current ? 2 : 1;
+      const sampledFrames: number[] = [];
+      for (let i = START_FRAME_INDEX + 16; i <= END_FRAME_INDEX; i += step) {
+        sampledFrames.push(i);
       }
-      for (let i = START_FRAME_INDEX - 6; i >= 1; i--) {
-        remainingFrames.push(i);
+      for (let i = START_FRAME_INDEX - 6; i >= 1; i -= step) {
+        sampledFrames.push(i);
       }
 
-      const CHUNK_SIZE = 8;
-      for (let idx = 0; idx < remainingFrames.length; idx += CHUNK_SIZE) {
+      // Load in small batches with pauses so main thread & mobile memory stay pristine
+      const BATCH_SIZE = isMobileRef.current ? 4 : 8;
+      for (let i = 0; i < sampledFrames.length; i += BATCH_SIZE) {
         if (isCancelled) break;
-        const chunk = remainingFrames.slice(idx, idx + CHUNK_SIZE);
-        await Promise.all(chunk.map(num => loadSingleFrame(num)));
-        // small pause between chunks to let main thread & network breathe
-        await new Promise(r => setTimeout(r, 20));
+        const batch = sampledFrames.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map(f => loadSingleFrame(f)));
+        await new Promise(r => setTimeout(r, 60));
       }
     };
 
-    preloadCriticalFrames();
+    runPreload();
 
     return () => {
       isCancelled = true;
+      // Clean up all cached image bitmaps on unmount
+      frameCacheMapRef.current.forEach((img) => {
+        if (img && 'close' in img && typeof img.close === 'function') {
+          try {
+            img.close();
+          } catch {
+            // ignore
+          }
+        }
+      });
+      frameCacheMapRef.current.clear();
     };
-  }, []);
+  }, [loadSingleFrame]);
 
   // Resize listener
   useEffect(() => {
@@ -265,7 +326,7 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
       try {
         await video.play();
       } catch (err) {
-        console.warn('Autoplay prevented by browser policy:', err);
+        console.warn('Autoplay handled by browser policy:', err);
       }
     };
 
@@ -281,11 +342,9 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
       if (!video) return;
 
       if (animStateRef.current.phase === 'intro') {
-        // Transition exactly when video reaches 3.0 seconds
         if (video.currentTime >= 3.0) {
           video.pause();
 
-          // Calculate exact start frame based on actual video duration
           const videoDur = video.duration || 8.0;
           const calculatedFrame = Math.min(
             TOTAL_FRAMES,
@@ -298,7 +357,6 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
           animStateRef.current.currentNormX = 0.5;
           animStateRef.current.hasSwitchedToCanvas = true;
 
-          // Prepare canvas and draw exact start frame
           updateCanvasSize();
           drawFrameToCanvas(calculatedFrame);
 
@@ -333,11 +391,9 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
       const state = animStateRef.current;
 
       if (!state.reducedMotion) {
-        // Responsiveness: 0.09 on active hover, 0.045 on mouse leave return
         const lerpFactor = state.isHovered ? 0.088 : 0.045;
         state.currentNormX += (state.targetNormX - state.currentNormX) * lerpFactor;
 
-        // Map interpolated 0..1 progress to frame range [startFrame..endFrame]
         const frameRange = state.endFrame - state.startFrame;
         const targetFrame = Math.round(state.startFrame + state.currentNormX * frameRange);
         const clampedFrame = Math.max(state.startFrame, Math.min(state.endFrame, targetFrame));
@@ -387,11 +443,10 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
   const handlePointerLeave = useCallback(() => {
     if (animStateRef.current.phase !== 'interactive') return;
     animStateRef.current.isHovered = false;
-    // Smooth return to center frame (0.5)
     animStateRef.current.targetNormX = 0.5;
   }, []);
 
-  // Touch Handlers for Mobile
+  // Touch Handlers for Mobile Devices
   const handleTouchMove = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
     if (animStateRef.current.phase !== 'interactive' || animStateRef.current.reducedMotion) return;
     if (e.touches.length === 0) return;
@@ -427,21 +482,22 @@ export const InteractiveVideoHero: React.FC<InteractiveVideoHeroProps> = ({
       onPointerLeave={handlePointerLeave}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      aria-label="Interactive 360-degree face light reflection campaign hero"
+      aria-label="Interactive face light reflection campaign hero"
     >
-      {/* 1. Pristine Original 1080p MP4 Video - Used ONLY for the initial 3-second cinematic intro */}
+      {/* 1. Pristine Original MP4 Video - Mobile-safe with webkit-playsinline */}
       <video
         ref={videoRef}
         className={`hero-pristine-video ${phase === 'interactive' ? 'video-hidden' : 'video-visible'}`}
         src={videoSrc}
         playsInline
+        webkit-playsinline="true"
         muted
         autoPlay
         preload="auto"
         controls={false}
       />
 
-      {/* 2. Single High-Performance HTML5 Canvas - Used for ALL interactive cursor face control */}
+      {/* 2. Single High-Performance HTML5 Canvas */}
       <canvas
         ref={canvasRef}
         className={`hero-interactive-canvas ${phase === 'interactive' ? 'canvas-visible' : 'canvas-hidden'}`}
